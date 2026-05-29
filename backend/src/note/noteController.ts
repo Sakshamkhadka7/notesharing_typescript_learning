@@ -3,7 +3,11 @@ import envConfig from "../config/config.js";
 import noteModel from "./noteModel.js";
 import createHttpError from "http-errors";
 
-export const createNote = async (req: Request, res: Response, next: NextFunction) => {
+export const createNote = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const file = req.file
       ? `${envConfig.backendURL}/${req.file.filename}`
@@ -30,7 +34,40 @@ export const createNote = async (req: Request, res: Response, next: NextFunction
   } catch (error) {
     console.log(error);
     console.log("Error occured at note creation");
-    next(createHttpError(500,"Error while creating note"));
+    next(createHttpError(500, "Error while creating note"));
   }
 };
 
+export const listNotes = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const notes = await noteModel.find();
+    res.status(200).json({
+      message: "Notes fetched",
+      data: notes,
+    });
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, "Error while fetching error"));
+  }
+};
+
+export const deleteNote = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const {id}=req.params
+    const notes = await noteModel.findByIdAndDelete(id)
+    res.status(200).json({
+      message: "Notes deleted"
+    });
+  } catch (error) {
+    console.log(error);
+    return next(createHttpError(500, "Error while deleting error"));
+  }
+};
