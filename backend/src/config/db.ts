@@ -2,10 +2,11 @@ import mongoose from "mongoose";
 import envConfig from "./config.js";
 const connectToDatabase = async () => {
   try {
-    await mongoose.connect(envConfig.mongoDbString as string);
-    mongoose.connection.on("Connected",()=>{
+      mongoose.connection.on("connected",()=>{
         console.log("Connected to db successfully");
     })
+    await mongoose.connect(envConfig.mongoDbString as string);
+  
   } catch (error) {
     console.log("Failed to connect database");
     process.exit(1)
