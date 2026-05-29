@@ -63,6 +63,9 @@ export const deleteNote = async (
   try {
     const {id}=req.params
     const notes = await noteModel.findByIdAndDelete(id)
+    if(notes){
+      return next(createHttpError(404,"Note not found with that ID"))
+    }
     res.status(200).json({
       message: "Notes deleted"
     });
