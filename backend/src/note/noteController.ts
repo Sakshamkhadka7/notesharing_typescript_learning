@@ -61,16 +61,43 @@ export const deleteNote = async (
   next: NextFunction,
 ) => {
   try {
-    const {id}=req.params
-    const notes = await noteModel.findByIdAndDelete(id)
-    if(notes){
-      return next(createHttpError(404,"Note not found with that ID"))
+    const { id } = req.params;
+    const notes = await noteModel.findByIdAndDelete(id);
+    if (!notes) {
+      return next(createHttpError(404, "Note not found with that ID"));
     }
     res.status(200).json({
-      message: "Notes deleted"
+      message: "Notes deleted",
     });
   } catch (error) {
     console.log(error);
     return next(createHttpError(500, "Error while deleting error"));
   }
+};
+
+export const editNote = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { title, description, subTitle } = req.body;
+  const { id } = req.params;
+  if (!id) {
+    return next(createHttpError(404, "Note not found with that ID"));
+  }
+
+  const noteExit = await noteModel.findById(id);
+  if (!noteExit) {
+    return next(createHttpError(404, "Note not found"));
+  }
+
+  const updateData = { title, description, subTitle, file: "" };
+  if (req.file) {
+    updateData.file = req.file.filename;
+  }
+
+  const updateNote = await noteModel.findByIdAndUpdate(id, updateData, {
+    new: true,
+    runValidators: true,
+  });
 };
