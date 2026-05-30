@@ -80,24 +80,44 @@ export const editNote = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const { title, description, subTitle } = req.body;
-  const { id } = req.params;
-  if (!id) {
-    return next(createHttpError(404, "Note not found with that ID"));
-  }
+  try {
+    const { title, description, subTitle } = req.body;
+    const { id } = req.params;
+    if (!id) {
+      return next(createHttpError(404, "Note not found with that ID"));
+    }
 
-  const noteExit = await noteModel.findById(id);
-  if (!noteExit) {
-    return next(createHttpError(404, "Note not found"));
-  }
+    const noteExit = await noteModel.findById(id);
+    if (!noteExit) {
+      return next(createHttpError(404, "Note not found"));
+    }
 
-  const updateData = { title, description, subTitle, file: "" };
-  if (req.file) {
-    updateData.file = req.file.filename;
-  }
+    const updateData: {
+      title?: string;
+      description?: string;
+      subTitle?: string;
+      file?: string;
+    } = {
+      title,
+      description,
+      subTitle,
+    };
 
-  const updateNote = await noteModel.findByIdAndUpdate(id, updateData, {
-    new: true,
-    runValidators: true,
-  });
+    if (req.file) {
+      updateData.file = req.file.filename;
+    }
+
+    const updateNote = await noteModel.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      message: "Note updated successfully",
+      data: updateNote,
+    });
+  } catch (error) {
+    console.log("Error occured at edit note", error);
+    next(createHttpError(404, "Somwthing went wrong at edit note"));
+  }
 };
